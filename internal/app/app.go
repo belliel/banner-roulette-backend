@@ -47,6 +47,7 @@ func Start(configPath string) {
 	}()
 
 	logrus.Info("Server started")
+	logrus.Infof("On http://localhost:%s", cfg.HTTPPort)
 	// Graceful Shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
