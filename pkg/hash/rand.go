@@ -13,6 +13,7 @@ func NewRandHash() *RandHash {
 }
 
 var src = rand.NewSource(time.Now().UnixNano())
+
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 const (
 	letterIdxBits = 6                    // 6 bits to represent a letter index
@@ -40,4 +41,3 @@ func (r *RandHash) Hash() string {
 
 	return sb.String()
 }
-
