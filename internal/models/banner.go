@@ -18,7 +18,7 @@ type Banner struct {
 	ShowCountCap      int       `json:"show_count_cap" bson:"show_count_cap" db:"show_count_cap"`
 	ShowCountPerGuest int       `json:"show_count_per_guest" bson:"show_count_per_guest" db:"show_count_per_guest"`
 	ShowHourStart     int       `json:"show_hour_start" bson:"show_hour_start" db:"show_hour_start"`
-	ShowHourEnd       int       `json:"show_hour_end" bson:"show_hour_env" db:"show_hour_end"`
+	ShowHourEnd       int       `json:"show_hour_end" bson:"show_hour_end" db:"show_hour_end"`
 	ShowCount         int       `json:"show_count" bson:"show_count" db:"show_count"`
-	Visible           bool      `json:"visible" bson:"visible" db:"visiblex"`
+	Visible           bool      `json:"visible" bson:"visible" db:"visible"`
 }
