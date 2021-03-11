@@ -1,8 +1,10 @@
-package services
+package service
 
 import (
 	"context"
 	"github.com/BellZaph/banner-roulette-backend/internal/models"
+	"github.com/BellZaph/banner-roulette-backend/internal/repository"
+	"github.com/BellZaph/banner-roulette-backend/pkg/hash"
 	"github.com/google/uuid"
 	"time"
 )
@@ -52,5 +54,21 @@ type Banners interface {
 	GetById(ctx context.Context, id uuid.UUID) (models.Banner, error)
 	GetRandom(ctx context.Context, hour int) (models.Banner, error)
 	GetRandoms(ctx context.Context, hour int, limit int) ([]models.Banner, error)
+}
+
+type Services struct {
+	Banners Banners
+}
+
+
+type Deps struct {
+	Repos                  *repository.Repository
+	Hasher                 hash.Hasher
+}
+
+func NewServices(deps Deps) *Services {
+	return &Services{
+		Banners: NewBannersService(deps.Repos.Banners, deps.Hasher),
+	}
 }
 

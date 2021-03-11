@@ -1,3 +1,6 @@
 .idea/
 main.exe
 main
+.env
+go_build_github_com_BellZaph_banner_roulette_backend_cmd_app.exe
+go_build_github_com_BellZaph_banner_roulette_backend_cmd_app
