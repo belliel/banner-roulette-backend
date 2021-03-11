@@ -8,9 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Banner interface {
+type Banners interface {
 	Create(ctx context.Context, banner models.Banner) error
 	Update(ctx context.Context, banner models.Banner) error
+	IncrementCount(ctx context.Context, id uuid.UUID) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetById(ctx context.Context, id uuid.UUID) (models.Banner, error)
 	GetRandom(ctx context.Context, hour int) (models.Banner, error)
@@ -18,7 +19,7 @@ type Banner interface {
 }
 
 type Repository struct {
-	Banner Banner
+	Banners Banners
 }
 
 func NewRepository(database interface{}) (*Repository, error) {
@@ -27,7 +28,7 @@ func NewRepository(database interface{}) (*Repository, error) {
 
 	if db, ok := database.(*mongo.Database); ok {
 
-		r.Banner = mongodb.NewBannerRepo(db)
+		r.Banners = mongodb.NewBannerRepo(db)
 
 		return r, nil
 	}

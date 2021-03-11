@@ -32,6 +32,11 @@ func (b *BannerRepo) Update(ctx context.Context, banner models.Banner) error {
 	return err
 }
 
+func (b *BannerRepo) IncrementCount(ctx context.Context, id uuid.UUID) error {
+	_, err := b.db.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$inc": bson.M{"show_count": 1}})
+	return err
+}
+
 func (b *BannerRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := b.db.DeleteOne(ctx, bson.M{"_id": id})
 	return err
