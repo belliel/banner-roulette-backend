@@ -6,7 +6,6 @@ import (
 	"github.com/BellZaph/banner-roulette-backend/internal/config"
 	"github.com/BellZaph/banner-roulette-backend/internal/repository"
 	"github.com/BellZaph/banner-roulette-backend/internal/service"
-	"github.com/BellZaph/banner-roulette-backend/internal/transport/http"
 	"github.com/BellZaph/banner-roulette-backend/pkg/database/mongodb"
 	"github.com/BellZaph/banner-roulette-backend/pkg/hash"
 	"github.com/sirupsen/logrus"
@@ -21,6 +20,8 @@ func Start(configPath string) {
 	db, err := mongodb.NewMongoDBDatabase(cfg.MongoURI, cfg.MongoDatabase)
 	if err != nil {
 		logrus.Fatal(err.Error())
+	} else {
+		logrus.Infof("%s connected", db.Name())
 	}
 
 	hasher := hash.NewRandHash()
@@ -35,10 +36,11 @@ func Start(configPath string) {
 		Hasher: hasher,
 	})
 
+	appCtx, cancelAppCtx := context.WithCancel(context.Background())
+	defer cancelAppCtx()
 
-	handlers := http.NewHandler(services)
 
-	srv := apiserver.NewServer(cfg, handlers.Init("", cfg.HTTPPort))
+	srv := apiserver.NewHTTPServer(appCtx, cfg, services, hasher,"")
 
 	go func() {
 		if err := srv.Run(); err != nil {
@@ -46,13 +48,11 @@ func Start(configPath string) {
 		}
 	}()
 
-	logrus.Info("Server started")
-	logrus.Infof("On http://localhost:%s", cfg.HTTPPort)
-	// Graceful Shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-
 	<-quit
+	logrus.Warn("interrupt signal")
+	cancelAppCtx()
 
 	if err := db.Client().Disconnect(context.Background()); err != nil {
 		logrus.Error(err.Error())

@@ -16,6 +16,7 @@ type Config struct {
 	MongoDatabase string
 
 	HTTPPort string
+	CertFile, KeyFile string
 
 	Debug bool
 }
