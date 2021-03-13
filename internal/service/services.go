@@ -54,6 +54,7 @@ type Banners interface {
 	GetById(ctx context.Context, id uuid.UUID) (models.Banner, error)
 	GetRandom(ctx context.Context, hour int) (models.Banner, error)
 	GetRandoms(ctx context.Context, hour int, limit int) ([]models.Banner, error)
+	GetByPage(ctx context.Context, page int) ([]models.Banner, error)
 }
 
 type Services struct {

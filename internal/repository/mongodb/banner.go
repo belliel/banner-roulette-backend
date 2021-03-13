@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -43,7 +44,7 @@ func (b *BannerRepo) Delete(ctx context.Context, id uuid.UUID) error {
 }
 
 func (b *BannerRepo) GetById(ctx context.Context, id uuid.UUID) (models.Banner, error) {
-	var banner models.Banner
+	var banner = models.Banner{}
 	err := b.db.FindOne(ctx, bson.M{"_id": id}).Decode(&banner)
 	return banner, err
 }
@@ -63,7 +64,6 @@ func (b *BannerRepo) GetRandom(ctx context.Context, hour int) (models.Banner, er
 			"show_hour_start": bson.M{"$gte": hour},
 			"show_hour_end": bson.M{"$lt": hour},
 			"$expr": bson.M{"$lt": bson.A{"show_count_cap", "show_count"}},
-			"$sample": bson.M{"size": 1 },
 		},
 	).Decode(&banner)
 	return banner, err
@@ -89,5 +89,30 @@ func (b *BannerRepo) GetRandomLimit(ctx context.Context, hour, limit int) ([]mod
 	).Decode(&banner)
 	return banner, err
 }
+
+func (b *BannerRepo) GetByPage(ctx context.Context, page int) ([]models.Banner, error) {
+	var banner = make([]models.Banner, 0)
+
+	const limit = 15
+
+	cursor, err := b.db.Find(
+		ctx,
+		options.Find().SetSkip(int64((page-1) * 15)),
+		options.Find().SetLimit(limit),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cursor.All(context.Background(), &banner)
+	if err != nil {
+		_ = cursor.Close(context.Background())
+		return nil, err
+	}
+
+	_ = cursor.Close(context.Background())
+	return banner, err
+}
+
 
 

@@ -14,11 +14,13 @@ func (h Handler) initBannersRoutes() chi.Router {
 
 	r.Use(ForceJSONContentType())
 	r.Get("/banner-{bannerId}", h.getBannerById)
+	r.Put("/banner-{bannerId}", h.incrementByID)
 	r.Put("/", h.putBannerById)
 	r.Post("/", h.createBanner)
 	r.Delete("/{bannerId}", h.deleteBanner)
 	r.Get("/random", h.getBannerRandom)
 	r.Get("/randoms", h.getBannerRandoms)
+	r.Get("/", h.getByPage)
 
 	return r
 }
@@ -109,7 +111,7 @@ func (h Handler) getBannerRandom(w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	banner, err := h.Services.Banners.GetRandoms(r.Context(), hour, 2)
+	banner, err := h.Services.Banners.GetRandom(r.Context(), hour)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
@@ -128,7 +130,7 @@ func (h Handler) getBannerRandoms(w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	banner, err := h.Services.Banners.GetRandom(r.Context(), hour)
+	banner, err := h.Services.Banners.GetRandoms(r.Context(), hour, 2)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
@@ -136,4 +138,42 @@ func (h Handler) getBannerRandoms(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = json.NewEncoder(w).Encode(banner)
+}
+
+func (h Handler) getByPage(w http.ResponseWriter, r *http.Request) {
+	pageString := r.URL.Query().Get("page")
+
+	page, err := strconv.Atoi(pageString)
+	if err != nil {
+		page = 0
+	}
+
+	banners, err := h.Services.Banners.GetByPage(r.Context(), page)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	_ = json.NewEncoder(w).Encode(banners)
+}
+
+func (h Handler) incrementByID(w http.ResponseWriter, r *http.Request) {
+	bannerIdString := chi.URLParam(r, "bannerId")
+
+	bannerId, err := uuid.Parse(bannerIdString)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		return
+	}
+
+
+	if err := h.Services.Banners.IncrementCount(r.Context(), bannerId); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	_ = json.NewEncoder(w).Encode(SuccessResponse{Success: true})
 }

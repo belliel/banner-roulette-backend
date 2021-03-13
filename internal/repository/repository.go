@@ -16,6 +16,7 @@ type Banners interface {
 	GetById(ctx context.Context, id uuid.UUID) (models.Banner, error)
 	GetRandom(ctx context.Context, hour int) (models.Banner, error)
 	GetRandomLimit(ctx context.Context, hour, limit int) ([]models.Banner, error)
+	GetByPage(ctx context.Context, page int) ([]models.Banner, error)
 }
 
 type Repository struct {

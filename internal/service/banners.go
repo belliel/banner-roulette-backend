@@ -84,3 +84,6 @@ func (b *BannersService) GetRandoms(ctx context.Context, hour int, limit int) ([
 	return b.repo.GetRandomLimit(ctx, hour, limit)
 }
 
+func (b *BannersService) GetByPage(ctx context.Context, page int) ([]models.Banner, error) {
+	return b.repo.GetByPage(ctx, page)
+}
