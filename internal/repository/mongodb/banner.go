@@ -20,6 +20,9 @@ func NewBannerRepo(db *mongo.Database) *BannerRepo {
 }
 
 func (b *BannerRepo) Create(ctx context.Context, banner models.Banner) error {
+	if banner.ID == uuid.Nil {
+		banner.ID = uuid.New()
+	}
 	_, err := b.db.InsertOne(ctx, banner)
 	return err
 }
@@ -94,15 +97,22 @@ func (b *BannerRepo) GetByPage(ctx context.Context, page int) ([]models.Banner, 
 	var banner = make([]models.Banner, 0)
 
 	const limit = 15
+	if page <= 0 {
+		page = 1
+	}
+
+	optionsFind := options.Find().SetSkip(int64((page-1) * limit)).SetLimit(limit)
 
 	cursor, err := b.db.Find(
 		ctx,
-		options.Find().SetSkip(int64((page-1) * 15)),
-		options.Find().SetLimit(limit),
+		bson.D{},
+		optionsFind,
 	)
 	if err != nil {
 		return nil, err
 	}
+
+
 
 	err = cursor.All(context.Background(), &banner)
 	if err != nil {

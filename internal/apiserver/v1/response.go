@@ -8,3 +8,6 @@ type SuccessResponse struct {
 	Success bool `json:"success"`
 }
 
+type ImageUploadResponse struct {
+	ImageURI string `json:"image_uri"`
+}

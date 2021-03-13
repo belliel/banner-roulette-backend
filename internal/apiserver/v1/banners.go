@@ -2,11 +2,16 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/BellZaph/banner-roulette-backend/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"io"
 	"net/http"
+	"os"
+	"path"
 	"strconv"
+	"strings"
 )
 
 func (h Handler) initBannersRoutes() chi.Router {
@@ -14,13 +19,15 @@ func (h Handler) initBannersRoutes() chi.Router {
 
 	r.Use(ForceJSONContentType())
 	r.Get("/banner-{bannerId}", h.getBannerById)
-	r.Put("/banner-{bannerId}", h.incrementByID)
-	r.Put("/", h.putBannerById)
-	r.Post("/", h.createBanner)
-	r.Delete("/{bannerId}", h.deleteBanner)
 	r.Get("/random", h.getBannerRandom)
 	r.Get("/randoms", h.getBannerRandoms)
 	r.Get("/", h.getByPage)
+	r.Put("/banner-{bannerId}", h.incrementByID)
+	r.Put("/", h.putBannerById)
+	r.Post("/", h.createBanner)
+	r.Post("/images/upload", h.uploadImage)
+	r.Delete("/{bannerId}", h.deleteBanner)
+
 
 	return r
 }
@@ -66,14 +73,14 @@ func (h Handler) createBanner(w http.ResponseWriter, r *http.Request) {
 	var banner service.BannerCreateInput
 
 	if err := json.NewDecoder(r.Body).Decode(&banner); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if err := h.Services.Banners.Create(r.Context(), banner); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -176,4 +183,37 @@ func (h Handler) incrementByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = json.NewEncoder(w).Encode(SuccessResponse{Success: true})
+}
+
+func (h Handler) uploadImage(w http.ResponseWriter, r *http.Request) {
+
+	file, handler, err := r.FormFile("image")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		return
+	}
+	defer file.Close()
+
+	extension := strings.Split(handler.Filename, ".")[len(strings.Split(handler.Filename, "."))-1]
+
+	fileName := h.Hasher.Hash()
+
+	filePath := path.Join("assets/images", fmt.Sprintf("%s.%s", fileName, extension))
+
+	dst, err := os.Create(filePath)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		return
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, file); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	_ = json.NewEncoder(w).Encode(ImageUploadResponse{ImageURI: filePath})
 }
