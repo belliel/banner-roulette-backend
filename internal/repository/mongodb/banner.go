@@ -32,7 +32,8 @@ func (b *BannerRepo) Update(ctx context.Context, banner models.Banner) error {
 
 	updateQuery = utils.ToMSI(banner, "bson", []string{"_id"})
 
-	_, err := b.db.UpdateOne(ctx, bson.M{"_id": banner.ID}, bson.M{"$set": updateQuery})
+	_, err := b.db.UpdateOne(ctx, bson.M{"_id": banner.ID}, bson.M{"$set": updateQuery}, options.Update().SetUpsert(true))
+
 	return err
 }
 
@@ -59,16 +60,37 @@ func (b *BannerRepo) GetRandom(ctx context.Context, hour int) (models.Banner, er
 		hour -= 24
 	}
 
-	err := b.db.FindOne(
+	cursor, err := b.db.Aggregate(
 		ctx,
-		bson.M{
-			"show_start_date": bson.M{"$gte": time.Now()},
-			"show_end_date": bson.M{"$lt": time.Now()},
-			"show_hour_start": bson.M{"$gte": hour},
-			"show_hour_end": bson.M{"$lt": hour},
-			"$expr": bson.M{"$lt": bson.A{"show_count_cap", "show_count"}},
+		mongo.Pipeline{
+			{{"$match", bson.M{
+				"show_start_date": bson.M{"$lte": time.Now()},
+				"show_end_date": bson.M{"$gte": time.Now()},
+				"show_hour_start": bson.M{"$lte": hour},
+				"show_hour_end": bson.M{"$gte": hour},
+				"visible": true,
+				"$or": bson.A{
+					bson.M{"show_count_cap": -1},
+					bson.M{"$expr": bson.D{{"$gt", bson.A{"$show_count_cap", "$show_count"}}}},
+				},
+			}}},
+			{{"$sample", bson.D{{"size", 1}}}},
 		},
-	).Decode(&banner)
+	)
+
+	if err != nil {
+		return models.Banner{}, err
+	}
+
+	if cursor.RemainingBatchLength() == 0 {
+		return models.Banner{}, mongo.ErrNoDocuments
+	}
+
+	if cursor.Next(ctx) {
+		_ = cursor.Decode(&banner)
+	}
+
+
 	return banner, err
 }
 
@@ -79,17 +101,33 @@ func (b *BannerRepo) GetRandomLimit(ctx context.Context, hour, limit int) ([]mod
 		hour -= 24
 	}
 
-	err := b.db.FindOne(
+	cursor, err := b.db.Aggregate(
 		ctx,
-		bson.M{
-			"show_start_date": bson.M{"$gte": time.Now()},
-			"show_end_date": bson.M{"$lt": time.Now()},
-			"show_hour_start": bson.M{"$gte": hour},
-			"show_hour_end": bson.M{"$lt": hour},
-			"$expr": bson.M{"$lt": bson.A{"show_count_cap", "show_count"}},
-			"$sample": bson.M{"size": limit },
+		mongo.Pipeline{
+			{{"$match", bson.M{
+				"show_start_date": bson.M{"$lte": time.Now()},
+				"show_end_date": bson.M{"$gte": time.Now()},
+				"show_hour_start": bson.M{"$lte": hour},
+				"show_hour_end": bson.M{"$gte": hour},
+				"visible": true,
+				"$or": bson.A{
+					bson.M{"show_count_cap": -1},
+					bson.M{"$expr": bson.D{{"$gt", bson.A{"$show_count_cap", "$show_count"}}}},
+				},
+			}}},
+			{{"$sample", bson.D{{"size", limit}}}},
 		},
-	).Decode(&banner)
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cursor.All(ctx, &banner); err != nil {
+		return nil, err
+	}
+
+	_ = cursor.Close(context.Background())
 	return banner, err
 }
 
@@ -111,8 +149,6 @@ func (b *BannerRepo) GetByPage(ctx context.Context, page int) ([]models.Banner, 
 	if err != nil {
 		return nil, err
 	}
-
-
 
 	err = cursor.All(context.Background(), &banner)
 	if err != nil {

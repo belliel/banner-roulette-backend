@@ -46,6 +46,7 @@ func (b *BannersService) Create(ctx context.Context, input BannerCreateInput) er
 func (b *BannersService) Update(ctx context.Context, input BannerUpdateInput) error {
 
 	banner := models.Banner{
+		ID: input.ID,
 		Name:              input.Name,
 		RawHTML:           input.RawHTML,
 		ImageURI:          input.ImageURI,
@@ -57,7 +58,7 @@ func (b *BannersService) Update(ctx context.Context, input BannerUpdateInput) er
 		ShowCountCap:      input.ShowCountCap,
 		ShowHourStart:     input.ShowHourStart,
 		ShowHourEnd:       input.ShowHourEnd,
-		ShowCount:         0,
+		ShowCount:         input.ShowCount,
 		Visible:           input.Visible,
 	}
 

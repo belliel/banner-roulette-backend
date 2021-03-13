@@ -73,14 +73,14 @@ func (h Handler) createBanner(w http.ResponseWriter, r *http.Request) {
 	var banner service.BannerCreateInput
 
 	if err := json.NewDecoder(r.Body).Decode(&banner); err != nil {
-		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
 		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if err := h.Services.Banners.Create(r.Context(), banner); err != nil {
-		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
 		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -189,8 +189,8 @@ func (h Handler) uploadImage(w http.ResponseWriter, r *http.Request) {
 
 	file, handler, err := r.FormFile("image")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer file.Close()
@@ -203,15 +203,15 @@ func (h Handler) uploadImage(w http.ResponseWriter, r *http.Request) {
 
 	dst, err := os.Create(filePath)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer dst.Close()
 
 	if _, err := io.Copy(dst, file); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
