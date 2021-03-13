@@ -14,6 +14,17 @@ import (
 	"syscall"
 )
 
+// @title Banner roulette backend
+// @version 1.0
+// @description This is a sample server celler server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Ruslan
+// @contact.email rkuserbaev@gmail.com
+
+// @host localhost:5000
+// @BasePath /v1
+// @query.collection.format multi
 func Start(configPath string) {
 	cfg := config.Get(configPath)
 

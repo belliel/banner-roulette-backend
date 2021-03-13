@@ -1,4 +1,4 @@
-.PHONY: build, local
+.PHONY: build, local, swag
 .SILENT:
 
 build:
@@ -6,7 +6,19 @@ build:
 
 local:
 	docker run --name some-mongo -d mongo:tag
-	docker run --name some-redis -d redis
 	build
 	./main
+
+container:
+	docker build --file ./Dockerfile --tag banner_roulette_backend:latest ./;
+	docker stop $(docker ps -q) || true
+	docker rm $(docker ps -aq) || true
+	docker run -d \
+ 		--volume="$(pwd)/assets:/banner_roulette_backend/assets" banner_roulette_backend
+
+
+
+
+swagger:
+	swag init -g internal/app/app.go
 

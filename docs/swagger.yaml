@@ -1,0 +1,381 @@
+basePath: /v1
+definitions:
+  models.Banner:
+    properties:
+      alt:
+        type: string
+      id:
+        type: string
+      image_uri:
+        type: string
+      name:
+        type: string
+      raw_html:
+        type: string
+      show_count:
+        type: integer
+      show_count_cap:
+        type: integer
+      show_count_per_guest:
+        type: integer
+      show_end_date:
+        type: string
+      show_hour_end:
+        type: integer
+      show_hour_start:
+        type: integer
+      show_start_date:
+        type: string
+      size:
+        type: string
+      uri:
+        type: string
+      visible:
+        type: boolean
+    type: object
+  service.BannerCreateInput:
+    properties:
+      alt:
+        type: string
+      id:
+        type: string
+      image_uri:
+        type: string
+      name:
+        type: string
+      raw_html:
+        type: string
+      show_count:
+        type: integer
+      show_count_cap:
+        type: integer
+      show_count_per_guest:
+        type: integer
+      show_end_date:
+        type: string
+      show_hour_end:
+        type: integer
+      show_hour_start:
+        type: integer
+      show_start_date:
+        type: string
+      size:
+        type: string
+      uri:
+        type: string
+      visible:
+        type: boolean
+    type: object
+  service.BannerUpdateInput:
+    properties:
+      alt:
+        type: string
+      id:
+        type: string
+      image_uri:
+        type: string
+      name:
+        type: string
+      raw_html:
+        type: string
+      show_count:
+        type: integer
+      show_count_cap:
+        type: integer
+      show_count_per_guest:
+        type: integer
+      show_end_date:
+        type: string
+      show_hour_end:
+        type: integer
+      show_hour_start:
+        type: integer
+      show_start_date:
+        type: string
+      size:
+        type: string
+      uri:
+        type: string
+      visible:
+        type: boolean
+    type: object
+  v1.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  v1.ImageUploadResponse:
+    properties:
+      image_uri:
+        type: string
+    type: object
+  v1.SuccessResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+host: localhost:5000
+info:
+  contact:
+    email: rkuserbaev@gmail.com
+    name: Ruslan
+  description: This is a sample server celler server.
+  termsOfService: http://swagger.io/terms/
+  title: Banner roulette backend
+  version: "1.0"
+paths:
+  /banner-{bannerId}:
+    put:
+      consumes:
+      - text/html
+      description: And its all
+      operationId: increment-by-id
+      parameters:
+      - description: bannerId
+        in: path
+        name: bannerId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Adds 1 show counter
+  /banners:
+    get:
+      consumes:
+      - text/html
+      description: Get ordered list of banners
+      operationId: get-by-page
+      parameters:
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Banner'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Get ordered list of banners
+    post:
+      consumes:
+      - application/json
+      description: Create new banner
+      operationId: create-banner
+      parameters:
+      - description: bannerInput
+        in: body
+        name: banner
+        required: true
+        schema:
+          $ref: '#/definitions/service.BannerCreateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Create banner
+    put:
+      consumes:
+      - application/json
+      description: Update banner by UUID id in http param
+      operationId: put-banner-by-id
+      parameters:
+      - description: bannerInput
+        in: body
+        name: banner
+        required: true
+        schema:
+          $ref: '#/definitions/service.BannerUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Update Banner by ID
+  /banners/{bannerId}:
+    delete:
+      consumes:
+      - text/html
+      description: Delete banner by id
+      operationId: delete-banner
+      parameters:
+      - description: bannerId
+        in: path
+        name: bannerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Delete banner
+  /banners/banner-{bannerId}:
+    get:
+      consumes:
+      - text/html
+      description: Get banner by UUID id in http param
+      operationId: get-banner-by-id
+      parameters:
+      - description: bannerId
+        in: path
+        name: bannerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Banner'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Banner by ID
+  /banners/images/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: multipart form data, i dont know how to pass it to Params
+      operationId: upload-image
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.ImageUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Hand file from browser
+  /banners/random:
+    get:
+      consumes:
+      - text/html
+      description: Get random banner from database
+      operationId: get-banner-random
+      parameters:
+      - description: hour
+        in: query
+        name: hour
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Banner'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Get random banner
+  /banners/randoms:
+    get:
+      consumes:
+      - text/html
+      description: Get random banners from database
+      operationId: get-banner-randoms
+      parameters:
+      - description: hour
+        in: query
+        name: hour
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Banner'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Get random banners with limit
+swagger: "2.0"

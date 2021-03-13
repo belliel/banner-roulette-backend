@@ -18,6 +18,7 @@ import (
 
 const (
 	filesDir      = "./assets"
+	docsDir 	  = "./docs"
 	compressLevel = 5
 )
 
@@ -86,6 +87,7 @@ func (srv *HTTPServer) setupRouter() chi.Router {
 
 	r.Mount("/v1", v1.Handler{Services: srv.Services, Hasher: srv.Hasher}.Routes())
 	r.Mount("/assets", resources.FilesResource{FilesDir: filesDir}.Routes())
+	r.Mount("/", resources.SwaggerResource{FilesPath: docsDir}.Routes())
 
 	return r
 }
