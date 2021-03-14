@@ -1,4 +1,4 @@
-.PHONY: build, mongo, container swag
+.PHONY: build, mongo, container, swagger
 .SILENT:
 
 build:
