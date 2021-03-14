@@ -1,7 +1,5 @@
 FROM golang:1.15-alpine3.12
 
-RUN mkdir /banner_roulette_backend
-
 WORKDIR /banner_roulette_backend
 
 COPY go.mod .
