@@ -5,9 +5,9 @@ build:
 	go build -o main ./cmd/app/main.go
 
 mongo:
-	docker run --name some-mongo \ 
+	docker run --name some-mongo \
 		-e MONGO_INITDB_ROOT_USERNAME=mongoadmin \
-		-e MONGO_INITDB_ROOT_PASSWORD=secret \ 
+		-e MONGO_INITDB_ROOT_PASSWORD=secret \
 		-d mongo:4.2-bionic
 
 
