@@ -5,7 +5,7 @@ build:
 	go build -o main ./cmd/app/main.go
 
 mongo:
-	docker run --name some-mongo -d mongo:tag
+	docker run --name some-mongo -d mongo:4.2-bionic
 
 
 container:
