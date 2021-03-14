@@ -16,7 +16,7 @@ container:
 	docker stop $(docker ps -q) || true
 	docker rm $(docker ps -aq) || true
 	docker run -d \
- 		--volume="$PWD/assets:/banner_roulette_backend/assets" banner_roulette_backend
+ 		--volume="($PWD)/assets:/banner_roulette_backend/assets" banner_roulette_backend
 
 swagger:
 	swag init -g internal/app/app.go
